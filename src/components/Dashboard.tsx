@@ -3,23 +3,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TaskCard, Task } from './TaskCard';
+import { TaskCard } from './TaskCard';
 import { TaskForm } from './TaskForm';
+import { Navigation, View } from './Navigation';
+import { CalendarView } from './CalendarView';
+import { ProgressMonitoring } from './ProgressMonitoring';
+import { PomodoroTimer } from './PomodoroTimer';
 import { Plus, Filter, CheckCircle, Clock, AlertCircle, BookOpen } from 'lucide-react';
+import { Task } from '@/types';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useToast } from '@/hooks/use-toast';
 
 export function Dashboard() {
-  const [tasks, setTasks] = useState<Task[]>([
+  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [tasks, setTasks] = useLocalStorage<Task[]>('taskmaster-tasks', [
     {
       id: '1',
       title: 'Calculus Problem Set 3',
       description: 'Complete problems 1-15 from chapter 4, focusing on derivatives and limits.',
       course: 'MATH 101',
       courseType: 'math',
-      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
       priority: 'high',
       completed: false,
-      type: 'assignment'
+      type: 'assignment',
+      progress: 25,
+      milestones: [],
+      resources: [],
+      collaborators: [],
+      isGroupProject: false,
+      studySessions: [],
+      tags: ['calculus', 'derivatives']
     },
     {
       id: '2', 
@@ -27,10 +42,17 @@ export function Dashboard() {
       description: 'Analyze results from acid-base titration experiment.',
       course: 'CHEM 201',
       courseType: 'science',
-      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+      dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       priority: 'medium',
       completed: false,
-      type: 'assignment'
+      type: 'assignment',
+      progress: 0,
+      milestones: [],
+      resources: [],
+      collaborators: [],
+      isGroupProject: false,
+      studySessions: [],
+      tags: ['chemistry', 'lab']
     },
     {
       id: '3',
@@ -38,23 +60,21 @@ export function Dashboard() {
       description: 'Analysis of themes in Hamlet - 1500 words minimum.',
       course: 'ENG 102',
       courseType: 'english', 
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       priority: 'medium',
       completed: true,
-      type: 'assignment'
-    },
-    {
-      id: '4',
-      title: 'Midterm Exam',
-      description: 'World War II and Cold War era - chapters 12-16.',
-      course: 'HIST 150',
-      courseType: 'history',
-      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Tomorrow
-      priority: 'high',
-      completed: false,
-      type: 'exam'
+      type: 'assignment',
+      progress: 100,
+      milestones: [],
+      resources: [],
+      collaborators: [],
+      isGroupProject: false,
+      studySessions: [],
+      tags: ['literature', 'essay']
     }
   ]);
+
+  const { notifications, unreadCount } = useNotifications(tasks);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
